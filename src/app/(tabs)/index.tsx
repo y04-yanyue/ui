@@ -1,8 +1,29 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { Image, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+
+// 把数据抽离出来，方便以后接入真后端
+const mockData = [
+  { id: '1', title: '伦敦眼夜间游', desc: '体验伦敦最美的夜景，俯瞰泰晤士河', price: '£35.00', rating: '4.8', category: '自然风光', tag: '热门', tagColor: '#E6F2FF', tagTextColor: '#007AFF', image: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=400&auto=format&fit=crop' },
+  { id: '2', title: '街头美食之旅', desc: '品尝最地道的当地小吃和特色料理', price: '£20.00', rating: '4.9', category: '美食探店', tag: '美食', tagColor: '#FFE4E1', tagTextColor: '#FF4500', image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=400&auto=format&fit=crop' },
+  { id: '3', title: '大英博物馆导览', desc: '探索世界文明的珍宝，聆听历史的回声', price: '£15.00', rating: '4.7', category: '历史人文', tag: '人文', tagColor: '#F3E5F5', tagTextColor: '#9C27B0', image: 'https://images.unsplash.com/photo-1566127444979-b3d2b654e3d7?q=80&w=400&auto=format&fit=crop' },
+];
+
+const categories = ['全部', '自然风光', '美食探店', '历史人文'];
+
 export default function HomeScreen() {
   const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('全部');
+
+  // 核心逻辑：根据搜索框和分类标签过滤数据
+  const filteredData = mockData.filter(item => {
+    const matchesSearch = item.title.includes(searchQuery) || item.desc.includes(searchQuery);
+    const matchesCategory = activeCategory === '全部' || item.category === activeCategory;
+    return matchesSearch && matchesCategory;
+  });
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -23,8 +44,11 @@ export default function HomeScreen() {
             placeholder="搜索目的地、活动..." 
             style={styles.searchInput}
             placeholderTextColor="#999"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
           />
         </View>
+
         {/* AI 智能横幅入口 */}
         <TouchableOpacity 
           style={styles.aiBanner} 
@@ -40,20 +64,18 @@ export default function HomeScreen() {
           </View>
           <Ionicons name="chevron-forward" size={20} color="#fff" />
         </TouchableOpacity>
+
         {/* 横向分类标签 */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll} contentContainerStyle={styles.categoryContainer}>
-          <TouchableOpacity style={[styles.categoryTag, styles.categoryTagActive]}>
-            <Text style={styles.categoryTextActive}>全部</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.categoryTag}>
-            <Text style={styles.categoryText}>自然风光</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.categoryTag}>
-            <Text style={styles.categoryText}>美食探店</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.categoryTag}>
-            <Text style={styles.categoryText}>历史人文</Text>
-          </TouchableOpacity>
+          {categories.map((cat) => (
+            <TouchableOpacity 
+              key={cat}
+              style={[styles.categoryTag, activeCategory === cat && styles.categoryTagActive]}
+              onPress={() => setActiveCategory(cat)}
+            >
+              <Text style={activeCategory === cat ? styles.categoryTextActive : styles.categoryText}>{cat}</Text>
+            </TouchableOpacity>
+          ))}
         </ScrollView>
 
         {/* 推荐活动卡片 */}
@@ -64,49 +86,32 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
         
-        {/* 卡片 1 */}
-        <TouchableOpacity style={styles.card} activeOpacity={0.8}>
-          <Image 
-            source={{ uri: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=400&auto=format&fit=crop' }} 
-            style={styles.cardImage} 
-          />
-          <View style={styles.cardContent}>
-            <View style={styles.cardBadge}>
-              <Text style={styles.cardBadgeText}>热门</Text>
-            </View>
-            <Text style={styles.cardTitle}>伦敦眼夜间游</Text>
-            <Text style={styles.cardDesc}>体验伦敦最美的夜景，俯瞰泰晤士河</Text>
-            <View style={styles.cardFooter}>
-              <Text style={styles.cardPrice}>£35.00</Text>
-              <View style={styles.ratingContainer}>
-                <Ionicons name="star" size={14} color="#FFD700" />
-                <Text style={styles.ratingText}>4.8</Text>
-              </View>
-            </View>
+        {/* 动态渲染列表 */}
+        {filteredData.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>没有找到相关的旅行推荐 🥲</Text>
           </View>
-        </TouchableOpacity>
-
-        {/* 卡片 2 */}
-        <TouchableOpacity style={styles.card} activeOpacity={0.8}>
-          <Image 
-            source={{ uri: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=400&auto=format&fit=crop' }} 
-            style={styles.cardImage} 
-          />
-          <View style={styles.cardContent}>
-            <View style={[styles.cardBadge, { backgroundColor: '#FFE4E1' }]}>
-              <Text style={[styles.cardBadgeText, { color: '#FF4500' }]}>美食</Text>
-            </View>
-            <Text style={styles.cardTitle}>街头美食之旅</Text>
-            <Text style={styles.cardDesc}>品尝最地道的当地小吃和特色料理</Text>
-            <View style={styles.cardFooter}>
-              <Text style={styles.cardPrice}>£20.00</Text>
-              <View style={styles.ratingContainer}>
-                <Ionicons name="star" size={14} color="#FFD700" />
-                <Text style={styles.ratingText}>4.9</Text>
+        ) : (
+          filteredData.map((item) => (
+            <TouchableOpacity key={item.id} style={styles.card} activeOpacity={0.8}>
+              <Image source={{ uri: item.image }} style={styles.cardImage} />
+              <View style={styles.cardContent}>
+                <View style={[styles.cardBadge, { backgroundColor: item.tagColor }]}>
+                  <Text style={[styles.cardBadgeText, { color: item.tagTextColor }]}>{item.tag}</Text>
+                </View>
+                <Text style={styles.cardTitle}>{item.title}</Text>
+                <Text style={styles.cardDesc}>{item.desc}</Text>
+                <View style={styles.cardFooter}>
+                  <Text style={styles.cardPrice}>{item.price}</Text>
+                  <View style={styles.ratingContainer}>
+                    <Ionicons name="star" size={14} color="#FFD700" />
+                    <Text style={styles.ratingText}>{item.rating}</Text>
+                  </View>
+                </View>
               </View>
-            </View>
-          </View>
-        </TouchableOpacity>
+            </TouchableOpacity>
+          ))
+        )}
 
         <View style={{ height: 20 }} />
       </ScrollView>
@@ -136,11 +141,13 @@ const styles = StyleSheet.create({
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 30, marginBottom: 15 },
   sectionTitle: { fontSize: 20, fontWeight: '700', color: '#1A1A1A' },
   seeAllText: { color: '#007AFF', fontWeight: '600' },
+  emptyContainer: { alignItems: 'center', marginTop: 40 },
+  emptyText: { color: '#999', fontSize: 16 },
   card: { backgroundColor: '#fff', borderRadius: 16, marginBottom: 20, overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.08, shadowRadius: 15, elevation: 5 },
   cardImage: { width: '100%', height: 180 },
   cardContent: { padding: 15 },
-  cardBadge: { position: 'absolute', top: -15, right: 15, backgroundColor: '#E6F2FF', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
-  cardBadgeText: { color: '#007AFF', fontSize: 12, fontWeight: '700' },
+  cardBadge: { position: 'absolute', top: -15, right: 15, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+  cardBadgeText: { fontSize: 12, fontWeight: '700' },
   cardTitle: { fontSize: 18, fontWeight: '700', color: '#1A1A1A', marginBottom: 5 },
   cardDesc: { fontSize: 14, color: '#666', lineHeight: 20, marginBottom: 15 },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 1, borderTopColor: '#F0F0F0', paddingTop: 12 },

@@ -1,29 +1,53 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+
+type Message = {
+  id: string;
+  role: 'user' | 'ai';
+  text: string;
+};
 
 export default function ChatScreen() {
   const router = useRouter();
   const [inputText, setInputText] = useState('');
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<Message[]>([
     { id: '1', role: 'ai', text: '你好！我是你的 AI 旅行管家 Spontai。你想去哪里玩？或者有什么特别的偏好吗？' }
   ]);
+  
+  // 用 ReturnType 替代 NodeJS.Timeout，彻底解决 TypeScript 标红问题
+  const typingTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const sendMessage = () => {
     if (!inputText.trim()) return;
-    const userMsg = { id: Date.now().toString(), role: 'user', text: inputText };
+
+    const userMsg: Message = { id: Date.now().toString(), role: 'user', text: inputText };
     setMessages(prev => [...prev, userMsg]);
     setInputText('');
 
-    setTimeout(() => {
-      const aiMsg = { 
-        id: (Date.now() + 1).toString(), 
-        role: 'ai', 
-        text: `收到！针对你说的「${userMsg.text}」，我为你生成了一份专属行程：\n\n📍 第一天：市中心经典打卡\n📍 第二天：当地美食与隐藏小店探索\n📍 第三天：自然风光放松游\n\n你需要我把这个加入你的行程表吗？` 
-      };
-      setMessages(prev => [...prev, aiMsg]);
-    }, 1000);
+    const aiMsgId = (Date.now() + 1).toString();
+    setMessages(prev => [...prev, { id: aiMsgId, role: 'ai', text: '' }]);
+
+    const fullText = `收到！针对你说的「${userMsg.text}」，我为你生成了一份专属行程：\n\n📍 第一天：市中心经典打卡\n📍 第二天：当地美食与隐藏小店探索\n📍 第三天：自然风光放松游\n\n你需要我把这个加入你的行程表吗？`;
+    
+    // 清除之前的定时器
+    if (typingTimer.current) clearInterval(typingTimer.current);
+    
+    let currentIndex = 0;
+    typingTimer.current = setInterval(() => {
+      currentIndex++;
+      
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.id === aiMsgId ? { ...msg, text: fullText.slice(0, currentIndex) } : msg
+        )
+      );
+
+      if (currentIndex >= fullText.length) {
+        if (typingTimer.current) clearInterval(typingTimer.current);
+      }
+    }, 50); 
   };
 
   return (
