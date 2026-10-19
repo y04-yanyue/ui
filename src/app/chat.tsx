@@ -10,16 +10,12 @@ export default function ChatScreen() {
     { id: '1', role: 'ai', text: '你好！我是你的 AI 旅行管家 Spontai。你想去哪里玩？或者有什么特别的偏好吗？' }
   ]);
 
-  // 模拟发送消息
   const sendMessage = () => {
     if (!inputText.trim()) return;
-
-    // 1. 添加用户消息
     const userMsg = { id: Date.now().toString(), role: 'user', text: inputText };
     setMessages(prev => [...prev, userMsg]);
     setInputText('');
 
-    // 2. 模拟 AI 延迟回复
     setTimeout(() => {
       const aiMsg = { 
         id: (Date.now() + 1).toString(), 
@@ -32,35 +28,21 @@ export default function ChatScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* 顶部导航 */}
       <View style={styles.header}>
         <TouchableOpacity 
-          onPress={() => {
-            if (router.canGoBack()) {
-              router.back();
-            } else {
-              router.replace('/(tabs)');
-            }
-          }} 
+          onPress={() => router.canGoBack() ? router.back() : router.replace('/(tabs)')} 
           style={styles.backBtn}
         >
           <Ionicons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
-        
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>AI 旅行管家</Text>
           <View style={styles.statusDot} />
         </View>
-        
         <View style={{ width: 24 }} />
       </View>
 
-      {/* 聊天记录区域 */}
-      <ScrollView 
-        style={styles.chatArea} 
-        contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView style={styles.chatArea} contentContainerStyle={{ padding: 20, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
         {messages.map((msg) => (
           <View key={msg.id} style={[styles.messageWrapper, msg.role === 'user' ? styles.userWrapper : styles.aiWrapper]}>
             {msg.role === 'ai' && (
@@ -77,7 +59,6 @@ export default function ChatScreen() {
         ))}
       </ScrollView>
 
-      {/* 底部输入框 */}
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
         <View style={styles.inputContainer}>
           <TextInput
