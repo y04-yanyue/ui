@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { Image, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-
 export default function HomeScreen() {
+  const router = useRouter();
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -24,7 +25,21 @@ export default function HomeScreen() {
             placeholderTextColor="#999"
           />
         </View>
-
+        {/* AI 智能横幅入口 */}
+        <TouchableOpacity 
+          style={styles.aiBanner} 
+          activeOpacity={0.9}
+          onPress={() => router.push('/chat')}
+        >
+          <View style={styles.aiBannerLeft}>
+            <Ionicons name="sparkles" size={24} color="#fff" />
+            <View style={{ marginLeft: 12 }}>
+              <Text style={styles.aiBannerTitle}>让 AI 帮你规划行程</Text>
+              <Text style={styles.aiBannerDesc}>一键生成专属旅行路线</Text>
+            </View>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#fff" />
+        </TouchableOpacity>
         {/* 横向分类标签 */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll} contentContainerStyle={styles.categoryContainer}>
           <TouchableOpacity style={[styles.categoryTag, styles.categoryTagActive]}>
@@ -108,6 +123,10 @@ const styles = StyleSheet.create({
   searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 12, paddingHorizontal: 15, marginTop: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 3 },
   searchIcon: { marginRight: 10 },
   searchInput: { flex: 1, paddingVertical: 15, fontSize: 16, color: '#333' },
+  aiBanner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#1A1A1A', borderRadius: 16, padding: 16, marginTop: 20, marginBottom: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 10, elevation: 5 },
+  aiBannerLeft: { flexDirection: 'row', alignItems: 'center' },
+  aiBannerTitle: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  aiBannerDesc: { color: '#AAA', fontSize: 12, marginTop: 2 },
   categoryScroll: { marginTop: 20, maxHeight: 40 },
   categoryContainer: { gap: 10, paddingRight: 20 },
   categoryTag: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: '#fff', borderWidth: 1, borderColor: '#E0E0E0' },

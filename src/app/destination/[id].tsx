@@ -17,7 +17,18 @@ export default function DestinationDetail() {
           <Image source={{ uri: image as string }} style={styles.coverImage} />
           {/* 返回按钮 */}
           <SafeAreaView style={styles.backButtonContainer}>
-            <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <TouchableOpacity 
+              style={styles.backButton} 
+              onPress={() => {
+                // 判断是否有历史记录
+                if (router.canGoBack()) {
+                  router.back();
+                } else {
+                  // 如果是直接打开的链接，没有历史记录，就跳回探索页
+                  router.replace('/(tabs)/explore');
+                }
+              }}
+            >
               <Ionicons name="arrow-back" size={24} color="#333" />
             </TouchableOpacity>
           </SafeAreaView>
