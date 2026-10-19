@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { Image, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const exploreData = [
@@ -11,6 +12,7 @@ const exploreData = [
 ];
 
 export default function ExploreScreen() {
+  const router = useRouter();
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -26,10 +28,24 @@ export default function ExploreScreen() {
           />
         </View>
 
-        {/* 瀑布流/网格 布局 */}
+               {/* 瀑布流/网格 布局 */}
         <View style={styles.gridContainer}>
           {exploreData.map((item) => (
-            <TouchableOpacity key={item.id} style={styles.card} activeOpacity={0.9}>
+            <TouchableOpacity 
+              key={item.id} 
+              style={styles.card} 
+              activeOpacity={0.9}
+              // 👇 核心魔法在这里，把数据传过去
+              onPress={() => router.push({
+                pathname: '/destination/[id]',
+                params: { 
+                  id: item.id, 
+                  title: item.title, 
+                  subtitle: item.subtitle, 
+                  image: item.image 
+                }
+              })}
+            >
               <Image source={{ uri: item.image }} style={[styles.cardImage, { height: item.height }]} />
               <View style={styles.overlay}>
                 <Text style={styles.cardTitle}>{item.title}</Text>
